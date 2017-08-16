@@ -1,0 +1,92 @@
+{% set name = "testresources" %}
+{% set version = "2.0.1" %}
+{% set hash_type = "sha256" %}
+{% set hash_value = "ee9d1982154a1e212d4e4bac6b610800bfb558e4fb853572a827bc14a96e4417" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.tar.gz'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  '{{ hash_type }}': '{{ hash_value }}'
+
+build:
+  number: 0
+  script: python setup.py install  --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pbr
+  run:
+    - python
+    - pbr
+
+about:
+  home: The package home page
+  license: Apache Software License or BSD License
+  license_family: BSD
+  license_file: ''
+  summary: Summary of the package
+  description: "testresources: extensions to python unittest to allow declarative use\nof resources by test cases.\n\nCopyright (C) 2005-2013  Robert Collins <robertc@robertcollins.net>\n\n  Licensed under\
+    \ either the Apache License, Version 2.0 or the BSD 3-clause\n  license at the users choice. A copy of both licenses are available in the\n  project source as Apache-2.0 and BSD. You may not use this\
+    \ file except in\n  compliance with one of these two licences.\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under these licenses is distributed on an \"AS\
+    \ IS\" BASIS, WITHOUT\n  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the\n  license you chose for the specific language governing permissions and\n  limitations under that\
+    \ license.\n\n  See the COPYING file for full details on the licensing of Testresources.\n\n\nTestresources\n+++++++++++++\n\ntestresources extends unittest with a clean and simple api to provide test\n\
+    optimisation where expensive common resources are needed for test cases - for\nexample sample working trees for VCS systems, reference databases for\nenterprise applications, or web servers ... let\
+    \ imagination run wild.\n\nDependencies to build/selftest\n==============================\n\n* Python 2.6+ (or 3.3+)\n* docutils\n* testtools (http://pypi.python.org/pypi/testtools/)\n* fixtures (http://pypi.python.org/pypi/fixtures)\n\
+    \nDependencies to use testresources\n=================================\n\n* Python 2.6+ (or 3.3+)\n\nFor older versions of Python, testresources <= 1.0.0 supported 2.4, 2.5 and\n3.2.\n\nHow testresources\
+    \ Works\n=======================\n\nThe basic idea of testresources is:\n\n* Tests declare the resources they need in a ``resources`` attribute.\n* When the test is run, the required resource objects\
+    \ are allocated (either\n  newly constructed, or reused), and assigned to attributes of the TestCase.\n\ntestresources distinguishes a 'resource manager' (a subclass of\n``TestResourceManager``) which\
+    \ acts as a kind of factory, and a 'resource'\nwhich can be any kind of object returned from the manager class's\n``getResource`` method.\n\nResources are either clean or dirty.  Being clean means they\
+    \ have same state in\nall important ways as a newly constructed instance and they can therefore be\nsafely reused.\n\nAt this time, testresources is incompatible with setUpClass and setUpModule -\n\
+    when an OptimisingTestSuite is wrapped around a test suite using those\nfeatures, the result will be flattened for optimisation and those setup's will\nnot run at all.\n\nMain Classes\n============\n\
+    \ntestresources.ResourcedTestCase\n-------------------------------\n\nBy extending or mixing-in this class, tests can have necessary resources\nautomatically allocated and disposed or recycled.\n\n\
+    ResourceTestCase can be used as a base class for tests, and when that is done\ntests will have their ``resources`` attribute automatically checked for\nresources by both OptimisingTestSuite and their\
+    \ own setUp() and tearDown()\nmethods. (This allows tests to remain functional without needing this specific\nTestSuite as a container). Alternatively, you can call setUpResources(self,\nresources,\
+    \ test_result) and tearDownResources(self, resources, test_result)\nfrom your own classes setUp and tearDown and the same behaviour will be\nactivated.\n\nTo declare the use of a resource, set the ``resources``\
+    \ attribute to a list of\ntuples of ``(attribute_name, resource_manager)``.\n\nDuring setUp, for each declared requirement, the test gains an attribute\npointing to an allocated resource, which is the\
+    \ result of calling\n``resource_manager.getResource()``.  ``finishedWith`` will be called on each\nresource during tearDown().\n\nFor example::\n\n    class TestLog(testresources.ResourcedTestCase):\n\
+    \n        resources = [('branch', BzrPopulatedBranch())]\n\n        def test_log(self):\n            show_log(self.branch, ...)\n\ntestresources.TestResourceManager\n---------------------------------\n\
+    \nA TestResourceManager is an object that tests can use to create resources.  It\ncan be overridden to manage different types of resources.  Normally test code\ndoesn't need to call any methods on it,\
+    \ as this will be arranged by the\ntestresources machinery.\n\nWhen implementing a new ``TestResourceManager`` subclass you should consider\noverriding these methods:\n\n``make``\n    Must be overridden\
+    \ in every concrete subclass.\n\n    Returns a new instance of the resource object\n    (the actual resource, not the TestResourceManager).  Doesn't need to worry about\n    reuse, which is taken care\
+    \ of separately.  This method is only called when a\n    new resource is definitely needed.\n\n    ``make`` is called by ``getResource``; you should not normally need to override\n    the latter.\n\n\
+    ``clean``\n    Cleans up an existing resource instance, eg by deleting a directory or\n    closing a network connection.  By default this does nothing, which may be\n    appropriate for resources that\
+    \ are automatically garbage collected.\n\n``_reset``\n    Reset a no-longer-used dirty resource to a clean state.  By default this\n    just discards it and creates a new one, but for some resources\
+    \ there may be a\n    faster way to reset them.\n\n``isDirty``\n    Check whether an existing resource is dirty.  By default this just reports\n    whether ``TestResourceManager.dirtied`` has been called\
+    \ or any of the\n    dependency resources are dirty.\n\nFor instance::\n\n    class TemporaryDirectoryResource(TestResourceManager):\n\n        def clean(self, resource):\n            shutil.rmtree(resource)\n\
+    \n        def make(self):\n            return tempfile.mkdtemp()\n\n        def isDirty(self, resource):\n            # Can't detect when the directory is written to, so assume it\n            # can\
+    \ never be reused.  We could list the directory, but that might\n            # not catch it being open as a cwd etc.\n            return True\n\nThe ``resources`` list on the TestResourceManager object\
+    \ is used to declare\ndependencies. For instance, a DataBaseResource that needs a TemporaryDirectory\nmight be declared with a resources list::\n\n    class DataBaseResource(TestResourceManager):\n\n\
+    \        resources = [(\"scratchdir\", TemporaryDirectoryResource())]\n\nMost importantly, two getResources to the same TestResourceManager with no\nfinishedWith call in the middle, will return the\
+    \ same object as long as it is\nnot dirty.\n\nWhen a Test has a dependency and that dependency successfully completes but\nreturns None, the framework does *not* consider this an error: be sure to always\n\
+    return a valid resource, or raise an error. Error handling hasn't been heavily\nexercised, but any bugs in this area will be promptly dealt with.\n\nA sample TestResourceManager can be found in the\
+    \ doc/ folder.\n\nSee pydoc testresources.TestResourceManager for details.\n\ntestresources.GenericResource\n-----------------------------\n\nGlue to adapt testresources to an existing resource-like\
+    \ class.\n\ntestresources.FixtureResource\n-----------------------------\n\nGlue to adapt testresources to the simpler fixtures.Fixture API. Long\nterm testresources is likely to consolidate on that\
+    \ simpler API as the\nrecommended method of writing resources.\n\ntestresources.OptimisingTestSuite\n---------------------------------\n\nThis TestSuite will introspect all the test cases it holds directly\
+    \ and if\nthey declare needed resources, will run the tests in an order that attempts to\nminimise the number of setup and tear downs required. It attempts to achieve\nthis by callling getResource()\
+    \ and finishedWith() around the sequence of tests\nthat use a specific resource.\n\nTests are added to an OptimisingTestSuite as normal. Any standard library\nTestSuite objects will be flattened, while\
+    \ any custom TestSuite subclasses\nwill be distributed across their member tests. This means that any custom\nlogic in test suites should be preserved, at the price of some level of\noptimisation.\n\
+    \nBecause the test suite does the optimisation, you can control the amount of\noptimising that takes place by adding more or fewer tests to a single\nOptimisingTestSuite. You could add everything to\
+    \ a single OptimisingTestSuite,\ngetting global optimisation or you could use several smaller\nOptimisingTestSuites.\n\n\ntestresources.TestLoader\n------------------------\n\nThis is a trivial TestLoader\
+    \ that creates OptimisingTestSuites by default.\n\nunittest.TestResult\n-------------------\n\ntestresources will log activity about resource creation and destruction to the\nresult object tests are\
+    \ run with. 6 extension methods are looked for:\n``startCleanResource``, ``stopCleanResource``, ``startMakeResource``,\n``stopMakeResource``, ``startResetResource`` and finally ``stopResetResource``.\n\
+    ``testresources.tests.ResultWithResourceExtensions`` is\nan example of a ``TestResult`` with these methods present.\n\nControlling Resource Reuse\n==========================\n\nWhen or how do I mark\
+    \ the resource dirtied?\n\nThe simplest approach is to have ``TestResourceManager.make`` call ``self.dirtied``:\nthe resource is always immediately dirty and will never be reused without first\nbeing\
+    \ reset.  This is appropriate when the underlying resource is cheap to\nreset or recreate, or when it's hard to detect whether it's been dirtied or to\ntrap operations that change it.\n\nAlternatively,\
+    \ override ``TestResourceManager.isDirty`` and inspect the resource to\nsee if it is safe to reuse.\n\nFinally, you can arrange for the returned resource to always call back to\n``TestResourceManager.dirtied``\
+    \ on the first operation that mutates it.\n\nFAQ\n===\n\n* Can I dynamically request resources inside a test method?\n\n  Generally, no, you shouldn't do this.  The idea is that the resources are\n\
+    \  declared statically, so that testresources can \"smooth\" resource usage across\n  several tests.\n\n  But, you may be able to find some object that is statically declared and reusable\n  to act\
+    \ as the resource, which can then provide methods to generate sub-elements\n  of itself during a test.\n\n* If the resource is held inside the TestResourceManager object, and the\n  TestResourceManager\
+    \ is typically constructed inline in the test case\n  ``resources`` attribute, how can they be shared across different test\n  classes?\n\n  Good question.\n\n  I guess you should arrange for a single\
+    \ instance to be held in an appropriate\n  module scope, then referenced by the test classes that want to share it.\n\nReleasing\n=========\n\n1. Add a section to NEWS (after In Development).\n2. git\
+    \ tag -s\n3. python setup.py sdist bdist_wheel upload -s"
+  doc_url: ''
+  dev_url: ''
+
+extra:
+  recipe-maintainers: ''
