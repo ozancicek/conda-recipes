@@ -1,0 +1,56 @@
+{% set name = "sure" %}
+{% set version = "1.4.6" %}
+{% set hash_type = "sha256" %}
+{% set hash_value = "3ff4f1a221b193e57194e58d75598169ace2e3a7c0e1f0108a4d65d384d7d8c7" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.tar.gz'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  '{{ hash_type }}': '{{ hash_value }}'
+
+build:
+  number: 0
+  script: python setup.py install  --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - mock
+    - six
+  run:
+    - python
+    - mock
+    - six
+
+test:
+  imports:
+    - sure
+  requires:
+    - nose
+
+about:
+  home: http://github.com/gabrielfalcao/sure
+  license: GNU General Public License v3 or later (GPLv3+)
+  license_family: GPL3
+  license_file: ''
+  summary: utility belt for automated testing in python for python
+  description: "sure\n====\n\nAn idiomatic testing library for python with powerful and flexible assertions. Sure\nis heavily inspired in `RSpec Expectations <http://rspec.info/documentation/3.5/rspec-expectations/>`_\
+    \ and `should.js <https://github.com/shouldjs/should.js>`_\n\n|Build Status| |PyPI package version| |PyPI python versions| |Join the chat at https://gitter.im/gabrielfalcao/sure|\n\n\nInstalling\n----------\n\
+    \n.. code:: bash\n\n    $ pip install sure\n\nDocumentation\n-------------\n\nAvailable in the `website <https://sure.readthedocs.io/en/latest/>`__ or under the\n``docs`` directory.\n\nYou can also\
+    \ build the documentation locally using sphinx:\n\n.. code:: bash\n\n    make docs\n\nHere is a tease\n---------------\n\nEquality\n~~~~~~~~\n\n(number).should.equal(number)\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\
+    \n.. code:: python\n\n    import sure\n\n    (4).should.be.equal(2 + 2)\n    (7.5).should.eql(3.5 + 4)\n\n    (3).shouldnt.be.equal(5)\n\nAssert dictionary and its contents\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\
+    \n.. code:: python\n\n    {'foo': 'bar'}.should.equal({'foo': 'bar'})\n    {'foo': 'bar'}.should.have.key('foo').which.should.equal('bar')\n\n\"A string\".lower().should.equal(\"a string\") also works\n\
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n.. code:: python\n\n    \"Awesome ASSERTIONS\".lower().split().should.equal(['awesome', 'assertions'])\n\n.. |Build Status| image:: https://travis-ci.org/gabrielfalcao/sure.png?branch=master\n\
+    \   :target: https://travis-ci.org/gabrielfalcao/sure\n.. |PyPI package version| image:: https://badge.fury.io/py/sure.svg\n   :target: https://badge.fury.io/py/sure\n.. |PyPI python versions| image::\
+    \ https://img.shields.io/pypi/pyversions/sure.svg\n   :target: https://pypi.python.org/pypi/sure\n.. |Join the chat at https://gitter.im/gabrielfalcao/sure| image:: https://badges.gitter.im/gabrielfalcao/sure.svg\n\
+    \   :target: https://gitter.im/gabrielfalcao/sure?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"
+  doc_url: ''
+  dev_url: ''
+
+extra:
+  recipe-maintainers: ''

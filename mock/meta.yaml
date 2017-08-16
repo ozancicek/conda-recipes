@@ -1,0 +1,44 @@
+{% set name = "mock" %}
+{% set version = "2.0.0" %}
+{% set hash_type = "sha256" %}
+{% set hash_value = "b158b6df76edd239b8208d481dc46b6afd45a846b7812ff0ce58971cf5bc8bba" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.tar.gz'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  '{{ hash_type }}': '{{ hash_value }}'
+
+build:
+  number: 0
+  script: python setup.py install  --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pbr
+  run:
+    - python
+
+about:
+  home: The package home page
+  license: BSD License
+  license_family: BSD
+  license_file: ''
+  summary: Summary of the package
+  description: "mock is a library for testing in Python. It allows you to replace parts of\nyour system under test with mock objects and make assertions about how they\nhave been used.\n\nmock is now part\
+    \ of the Python standard library, available as `unittest.mock\n<https://docs.python.org/dev/library/unittest.mock.html>`_ in Python 3.3\nonwards.\n\nThis package contains a rolling backport of the standard\
+    \ library mock code\ncompatible with Python 2.6 and up, and 3.3 and up.\n\nPlease see the standard library documentation for more details.\n\n:Homepage: `Mock Homepage`_\n:Download: `Mock on PyPI`_\n\
+    :Documentation: `Python Docs`_\n:License: `BSD License`_\n:Support: `Mailing list (testing-in-python@lists.idyll.org)\n <http://lists.idyll.org/listinfo/testing-in-python>`_\n:Issue tracker: `Github\
+    \ Issues\n <https://github.com/testing-cabal/mock/issues>`_\n:Build status:\n  .. image:: https://travis-ci.org/testing-cabal/mock.svg?branch=master\n      :target: https://travis-ci.org/testing-cabal/mock\n\
+    \n.. _Mock Homepage: https://github.com/testing-cabal/mock\n.. _BSD License: http://github.com/testing-cabal/mock/blob/master/LICENSE.txt\n.. _Python Docs: https://docs.python.org/dev/library/unittest.mock.html\n\
+    .. _mock on PyPI: http://pypi.python.org/pypi/mock"
+  doc_url: ''
+  dev_url: ''
+
+extra:
+  recipe-maintainers: ''
