@@ -1,0 +1,20 @@
+{% set name = "libcouchbase" %}
+{% set version = "2.6.1" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  git_url: https://github.com/couchbase/libcouchbase.git
+  git_tag: '{{ version }}'
+
+requirements:
+  build:
+    - cmake
+    - libevent
+    - openssl
+
+  run:
+    - libevent
+    - openssl
