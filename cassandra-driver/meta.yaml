@@ -1,0 +1,74 @@
+{% set name = "cassandra-driver" %}
+{% set version = "3.11.0" %}
+{% set hash_type = "sha256" %}
+{% set hash_value = "643bed0fac08ee91630f0f35556bb62c3b4b007c20d4e6e8d349f769ea648150" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.tar.gz'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  '{{ hash_type }}': '{{ hash_value }}'
+
+build:
+  number: 0
+  script : python setup.py build build_ext -I${PREFIX}/include -L${PREFIX}/lib install --single-version-externally-managed --record record.txt
+  script : python setup.py install --no-cython --single-version-externally-managed --record record.txt
+
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - cython
+    - six >=1.9
+  run:
+    - python
+    - six >=1.9
+
+test:
+  imports:
+    - cassandra
+    - cassandra.cqlengine
+    - cassandra.io
+  requires:
+    - mock
+    - nose
+    - pytz
+    - pyyaml
+    - sure
+
+about:
+  home: http://github.com/datastax/python-driver
+  license: Apache Software License
+  license_family: APACHE
+  license_file: ''
+  summary: Python driver for Cassandra
+  description: "DataStax Python Driver for Apache Cassandra\n===========================================\n\n.. image:: https://travis-ci.org/datastax/python-driver.png?branch=master\n   :target: https://travis-ci.org/datastax/python-driver\n\
+    \nA modern, `feature-rich <https://github.com/datastax/python-driver#features>`_ and highly-tunable Python client library for Apache Cassandra (2.1+) using exclusively Cassandra's binary protocol and\
+    \ Cassandra Query Language v3.\n\nThe driver supports Python 2.7, 3.3, 3.4, 3.5, and 3.6.\n\nIf you require compatibility with DataStax Enterprise, use the `DataStax Enterprise Python Driver <http://docs.datastax.com/en/developer/python-dse-driver/>`_.\n\
+    \nFeedback Requested\n------------------\n**Help us focus our efforts!** Provide your input on the `Platform and Runtime Survey <https://docs.google.com/a/datastax.com/forms/d/10wkbKLqmqs91gvhFW5u43y60pg_geZDolVNrxfO5_48/viewform>`_\
+    \ (we kept it short).\n\nFeatures\n--------\n* `Synchronous <http://datastax.github.io/python-driver/api/cassandra/cluster.html#cassandra.cluster.Session.execute>`_ and `Asynchronous <http://datastax.github.io/python-driver/api/cassandra/cluster.html#cassandra.cluster.Session.execute_async>`_\
+    \ APIs\n* `Simple, Prepared, and Batch statements <http://datastax.github.io/python-driver/api/cassandra/query.html#cassandra.query.Statement>`_\n* Asynchronous IO, parallel execution, request pipelining\n\
+    * `Connection pooling <http://datastax.github.io/python-driver/api/cassandra/cluster.html#cassandra.cluster.Cluster.get_core_connections_per_host>`_\n* Automatic node discovery\n* `Automatic reconnection\
+    \ <http://datastax.github.io/python-driver/api/cassandra/policies.html#reconnecting-to-dead-hosts>`_\n* Configurable `load balancing <http://datastax.github.io/python-driver/api/cassandra/policies.html#load-balancing>`_\
+    \ and `retry policies <http://datastax.github.io/python-driver/api/cassandra/policies.html#retrying-failed-operations>`_\n* `Concurrent execution utilities <http://datastax.github.io/python-driver/api/cassandra/concurrent.html>`_\n\
+    * `Object mapper <http://datastax.github.io/python-driver/object_mapper.html>`_\n\nInstallation\n------------\nInstallation through pip is recommended::\n\n    $ pip install cassandra-driver\n\nFor\
+    \ more complete installation instructions, see the\n`installation guide <http://datastax.github.io/python-driver/installation.html>`_.\n\nDocumentation\n-------------\nThe documentation can be found\
+    \ online `here <http://datastax.github.io/python-driver/index.html>`_.\n\nA couple of links for getting up to speed:\n\n* `Installation <http://datastax.github.io/python-driver/installation.html>`_\n\
+    * `Getting started guide <http://datastax.github.io/python-driver/getting_started.html>`_\n* `API docs <http://datastax.github.io/python-driver/api/index.html>`_\n* `Performance tips <http://datastax.github.io/python-driver/performance.html>`_\n\
+    \nObject Mapper\n-------------\ncqlengine (originally developed by Blake Eggleston and Jon Haddad, with contributions from the\ncommunity) is now maintained as an integral part of this package. Refer\
+    \ to\n`documentation here <http://datastax.github.io/python-driver/object_mapper.html>`_.\n\nContributing\n------------\nSee `CONTRIBUTING.md <https://github.com/datastax/python-driver/blob/master/CONTRIBUTING.rst>`_.\n\
+    \nReporting Problems\n------------------\nPlease report any bugs and make any feature requests on the\n`JIRA <https://datastax-oss.atlassian.net/browse/PYTHON>`_ issue tracker.\n\nIf you would like\
+    \ to contribute, please feel free to open a pull request.\n\nGetting Help\n------------\nYour best options for getting help with the driver are the\n`mailing list <https://groups.google.com/a/lists.datastax.com/forum/#!forum/python-driver-user>`_\n\
+    and the ``#datastax-drivers`` channel in the `DataStax Academy Slack <https://academy.datastax.com/slack>`_.\n\nLicense\n-------\nCopyright 2013-2017 DataStax\n\nLicensed under the Apache License, Version\
+    \ 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\nhttp://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by\
+    \ applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee\
+    \ the License for the specific language governing permissions and\nlimitations under the License.\n"
+  doc_url: ''
+  dev_url: ''
+
+extra:
+  recipe-maintainers: ''
